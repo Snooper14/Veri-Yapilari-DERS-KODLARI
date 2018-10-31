@@ -1,0 +1,213 @@
+#include <iostream>
+#include <string.h>
+#include <stdlib.h>
+using namespace std;
+
+typedef struct student
+{
+char name[20];
+float diploma_score;
+struct student *next;
+}student_Item;
+
+
+bool insert_Student(student_Item ** , student_Item *);
+int delete_Student(student_Item ** , char []);
+void listingStudents(student_Item *);
+int strCompare(char [],char []);
+student_Item *findWhere(student_Item *,char []);
+int main()
+{
+
+   string choice;
+
+   student_Item *HeadStudent; //initializing head pointer
+   HeadStudent=NULL;
+   do
+   {   cout<<"Student Automation:"<<endl;
+       cout<<"Make choice insert(i) , delete (d),  listing(l) , search (s), quit(q) ?";
+       cin>>choice;
+
+       if (choice=="i")
+       {
+           float score;
+           char name[20];
+           cout<<endl<<"Enter the name of student:";
+           cin>>name;
+
+           cout<<"Enter student diploma score:";
+           cin>>score;
+
+           student_Item *newStudent;
+           newStudent=(student_Item *) malloc(sizeof(student_Item));
+           if (newStudent==NULL) cout<<"Enough memory not allocated!!!";
+           strcpy(newStudent->name,name);
+           newStudent->diploma_score=score;
+           newStudent->next=NULL;
+
+           if (HeadStudent==NULL)
+           {
+               HeadStudent=newStudent;
+           }//end if
+
+           else
+           { // insertion on list
+            insert_Student(&HeadStudent,newStudent);
+           } //end else
+
+       } //end if
+
+       else if (choice=="d")
+       {
+           char name[20];
+           cout<<"Enter name of to be deleted student:";
+           cin>>name;
+
+           int delete_statu;
+           delete_statu=delete_Student(&HeadStudent,name);
+           if(delete_statu==1) cout<<name<< " deleted from the list!"<<endl;
+           else cout<<"Error occurred during deletion:Error code "<<delete_statu<<endl;
+       }//end if
+       else if (choice=="l")
+       {
+           cout<<"All students in the list:\n\n";
+           listingStudents(HeadStudent);
+       } //end if
+
+       else if (choice=="s")
+       {
+           char name[20];
+           cout<<endl<<"Enter the name of to be searched student:";
+           cin>>name;
+
+           if (strCompare(HeadStudent->name,name)==0)
+           {
+              cout<<"Searched student found:"<<endl;
+              cout<<"Name:"<<HeadStudent->name<<endl;
+              cout<<"Diploma Score:"<<HeadStudent->diploma_score<<endl;
+              cout<<endl<<endl;
+           }//end if
+           else
+           {
+           student_Item *searchStd=findWhere(HeadStudent,name);
+
+
+           if (strCompare(searchStd->next->name,name)==0)
+           {
+               cout<<"Searched student found:"<<endl;
+               cout<<"Name:"<<searchStd->next->name<<endl;
+               cout<<"Diploma Score:"<<searchStd->next->diploma_score<<endl;
+               cout<<endl<<endl;
+           }//end else
+
+           else cout<<"Searched student not found!!!"<<endl<<endl;
+
+           } //end else
+
+       } // end searching option
+
+       else if (choice=="q") break;
+
+       else cout<<endl<<"Please make valid choice!!!"<<endl;
+
+   }while(choice!="q");
+
+    return 0;
+}
+
+
+int strCompare(char s1[],char s2[])
+{
+    for (int i=0;s1[i]!='\0' || s2[i]!='\0';i++)
+    {
+        if (s1[i]>s2[i]) return 1;
+        if (s1[i]<s2[i]) return -1;
+
+    }//end of function
+
+    return 0;
+}//end of function
+
+
+void listingStudents(student_Item *Phead)
+{
+    if(Phead==NULL) cout<<"Student list is empty!!!"<<endl;
+
+    while(Phead!=NULL)
+    {
+        cout<<"Student name:"<<Phead->name<<endl;
+        cout<<"Student's diploma score:"<<Phead->diploma_score<<endl<<endl;
+
+        Phead=Phead->next;
+    }//end of while
+
+}//end of functions
+
+
+student_Item *findWhere(student_Item *pHead,char name[])
+{
+    while(pHead->next)
+    {
+
+        if (strCompare(pHead->next->name,name)>=0) return pHead;
+
+        pHead=pHead->next;
+    }//end of while
+
+    return pHead;
+
+}//end of fuction
+
+bool insert_Student(student_Item **PHeadStudent,student_Item *stdent)
+{
+
+    if (strCompare(stdent->name,(*PHeadStudent)->name)==-1) // head pointer modifying
+    {
+
+    stdent->next=(*PHeadStudent);
+    (*PHeadStudent)=stdent;
+    return true;
+    }//end if
+
+    student_Item *whereStd=findWhere(*PHeadStudent,stdent->name);
+
+
+    // insert after operations
+    stdent->next=whereStd->next;
+    whereStd->next=stdent;
+    return true;
+
+}//end of function
+
+
+int  delete_Student(student_Item **HeadStudent , char name[])
+{
+
+
+    if(strCompare((*HeadStudent)->name,name)==0) // head pointer which points head item , removing
+    {
+        temp=(*HeadStudent)->next;
+        (*HeadStudent)=(*HeadStudent)->next;
+        (*HeadStudent)->previous=NULL;
+
+        free(temp);
+        return 1;
+    }   //end if
+
+    student_Item *del_prev=findWhere((*HeadStudent),name);
+
+    if (del_prev==NULL) return -1; // error occurred!!!
+    else if (strCompare(del_prev->next->name,name)!=0) return -2; // to be deleted student item not found!!!
+    else
+    {
+    student_Item *temp;
+    temp=del_prev->next;
+    del_prev->next=del_prev->next->next;
+    free(temp);
+    return 1;
+    } // end else
+
+
+}//end of function
+
+
